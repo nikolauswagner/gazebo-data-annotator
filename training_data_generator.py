@@ -69,8 +69,8 @@ class TrainingDataGenerator():
           if coords[0] >= 0 and coords[0] < self.camera.info_rgb.width and \
              coords[1] >= 0 and coords[1] < self.camera.info_rgb.height:
             box = projectToImg((pos[0], 0.05, 0.05), self.camera.info_rgb)
-            w = self.camera.info_rgb.width/2  - box[0]
-            h = self.camera.info_rgb.height/2 - box[1]
+            w = int(self.camera.info_rgb.width/2  - box[0])
+            h = int(self.camera.info_rgb.height/2 - box[1])
             x = int(coords[0] - (w / 2))
             y = int(coords[1] - (h / 2))
             self.dataset.addAnnotation(x, y, w, h, 3, self.camera.img_id_rgb, obj.id)
