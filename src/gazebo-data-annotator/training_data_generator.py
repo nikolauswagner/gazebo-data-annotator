@@ -28,11 +28,11 @@ class TrainingDataGenerator():
   def __init__(self, keyword, target_dir):
     self.states_sub = rospy.Subscriber("/gazebo/link_states", 
                                        LinkStates, self.statesCB)
-    self.keyword = keyword
+    self.keyword    = keyword
     self.target_dir = target_dir
-    self.objects = []
-    self.dataset = CocoDataset()
-    self.camera = RealsenseCamera()
+    self.objects    = []
+    self.dataset    = CocoDataset(target_dir + "dataset.json")
+    self.camera     = RealsenseCamera()
 
     self.rate = rospy.Rate(100)
     self.run()
@@ -54,9 +54,9 @@ class TrainingDataGenerator():
     while not rospy.is_shutdown():
       if self.camera.img_ready_rgb and self.camera.img_ready_depth:
         # Store image
-        filename = self.target_dir + str(self.camera.img_id_rgb).zfill(4) + ".png"
+        filename = self.target_dir + "/rgb/" + str(self.camera.img_id_rgb).zfill(4) + ".png"
         cv2.imwrite(filename, cv2.cvtColor(self.camera.img_rgb, cv2.COLOR_BGR2RGB))
-        self.dataset.addImage(filename, 
+        self.dataset.addImage("rgb/" + str(self.camera.img_id_rgb).zfill(4) + ".png", 
                               self.camera.img_id_rgb, 
                               self.camera.info_rgb.width, 
                               self.camera.info_rgb.height)
@@ -85,7 +85,7 @@ class TrainingDataGenerator():
 if __name__ == '__main__':
   try:
     rospy.init_node('training_data_generator', anonymous=True)
-    target_dir = "./annotated_data/strawberries_01/rgb/"
+    target_dir = "./annotated_data/strawberries_01/"
     try:
       os.makedirs(target_dir)
     except:

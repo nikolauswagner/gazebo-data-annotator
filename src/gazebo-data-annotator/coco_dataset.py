@@ -4,7 +4,8 @@ import time
 import json
 
 class CocoDataset():
-  def __init__(self):
+  def __init__(self, filename):
+    self.filename = filename
     self.dataset = {}
     self.dataset["annotations"] = []
     self.dataset["images"]      = []
@@ -16,9 +17,11 @@ class CocoDataset():
     rospy.on_shutdown(self.writeJson)
 
   def writeJson(self):
-    file = open("annotated_data/strawberries_01/dataset.json", "w")
+    print("Caught", len(self.dataset["images"]), "images!")
+    file = open(self.filename, "w")
     json.dump(self.dataset, file, indent=2)
     file.close()
+    print("Written dataset to", self.filename, ".")
 
   def genInformation(self, contributor, description):
     self.dataset["info"] = {}
