@@ -26,13 +26,13 @@ def projectToImg(pos, cam_info):
 
 class TrainingDataGenerator():
   def __init__(self, keyword, target_dir):
-    self.states_sub = rospy.Subscriber("/gazebo/link_states", 
-                                       LinkStates, self.statesCB)
     self.keyword    = keyword
     self.target_dir = target_dir
     self.objects    = []
     self.dataset    = CocoDataset(target_dir + "dataset.json")
     self.camera     = RealsenseCamera()
+    self.states_sub = rospy.Subscriber("/gazebo/link_states", 
+                                       LinkStates, self.statesCB)
 
     try:
       os.makedirs(target_dir + "/rgb")
@@ -74,12 +74,18 @@ class TrainingDataGenerator():
           coords = projectToImg(pos, self.camera.info_rgb)
           if coords[0] >= 0 and coords[0] < self.camera.info_rgb.width and \
              coords[1] >= 0 and coords[1] < self.camera.info_rgb.height:
+            # Obtain bounding box
             box = projectToImg((pos[0], 0.05, 0.05), self.camera.info_rgb)
             w = int(self.camera.info_rgb.width/2  - box[0])
             h = int(self.camera.info_rgb.height/2 - box[1])
-            x = int(coords[0] - (w / 2))
-            y = int(coords[1] - (h / 2))
-            self.dataset.addAnnotation(x, y, w, h, 3, self.camera.img_id_rgb, obj.id)
+            x_pos = int(coords[0] - (w / 2))
+            y_pos = int(coords[1] - (h / 2))
+            # Obtain direction
+            rot = rotVecByQuat(np.array((0,0,1)), obj.rot())
+            rot = rotVecByQuat(rot, quaternion_inverse(self.camera.rot()))
+            self.dataset.addAnnotation(x_pos, y_pos, w, h,
+                                       rot[0], rot[1], rot[2], 
+                                       3, self.camera.img_id_rgb, obj.id)
 
         # Reset flags
         self.camera.img_ready_rgb   = False

@@ -21,7 +21,7 @@ class CocoDataset():
     file = open(self.filename, "w")
     json.dump(self.dataset, file, indent=2)
     file.close()
-    print("Written dataset to", self.filename, ".")
+    print("Written dataset to", self.filename)
 
   def genInformation(self, contributor, description):
     self.dataset["info"] = {}
@@ -61,10 +61,11 @@ class CocoDataset():
     img["width"]         = w
     self.dataset["images"].append(img)
 
-  def addAnnotation(self, x, y, w, h, cat, img_id, obj_id):
+  def addAnnotation(self, x_pos, y_pos, w, h, x_rot, y_rot, z_rot, cat, img_id, obj_id):
     annotation = {}
     annotation["area"]         = w * h
-    annotation["bbox"]         = [x, y, w, h]
+    annotation["bbox"]         = [x_pos, y_pos, w, h]
+    annotation["orientation"]  = [x_rot, y_rot, z_rot]
     annotation["category_id"]  = cat
     annotation["id"]           = obj_id
     annotation["image_id"]     = img_id
