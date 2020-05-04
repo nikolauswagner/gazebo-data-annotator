@@ -34,6 +34,12 @@ class TrainingDataGenerator():
     self.dataset    = CocoDataset(target_dir + "dataset.json")
     self.camera     = RealsenseCamera()
 
+    try:
+      os.makedirs(target_dir + "/rgb")
+      os.makedirs(target_dir + "/depth")
+    except:
+      pass
+
     self.rate = rospy.Rate(100)
     self.run()
 
@@ -86,10 +92,6 @@ if __name__ == '__main__':
   try:
     rospy.init_node('training_data_generator', anonymous=True)
     target_dir = "./annotated_data/strawberries_01/"
-    try:
-      os.makedirs(target_dir)
-    except:
-      pass
     TrainingDataGenerator("strawberry", target_dir)
 
   except rospy.ROSInterruptException:
