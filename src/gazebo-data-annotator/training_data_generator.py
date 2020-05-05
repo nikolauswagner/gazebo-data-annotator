@@ -60,8 +60,14 @@ class TrainingDataGenerator():
     while not rospy.is_shutdown():
       if self.camera.img_ready_rgb and self.camera.img_ready_depth:
         # Store image
-        filename = self.target_dir + "/rgb/" + str(self.camera.img_id_rgb).zfill(4) + ".png"
-        cv2.imwrite(filename, cv2.cvtColor(self.camera.img_rgb, cv2.COLOR_BGR2RGB))
+        filename_rgb = (self.target_dir + "/rgb/" + 
+                        str(self.camera.img_id_rgb).zfill(4) + ".png")
+        cv2.imwrite(filename_rgb, cv2.cvtColor(self.camera.img_rgb, cv2.COLOR_BGR2RGB))
+        filename_depth = (self.target_dir + "/depth/" + 
+                          str(self.camera.img_id_depth).zfill(4) + ".png")
+        cv2.imwrite(filename_depth, self.camera.img_depth)
+
+        # Add image to dataset
         self.dataset.addImage("rgb/" + str(self.camera.img_id_rgb).zfill(4) + ".png", 
                               self.camera.img_id_rgb, 
                               self.camera.info_rgb.width, 
