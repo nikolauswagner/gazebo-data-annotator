@@ -65,7 +65,7 @@ class TrainingDataGenerator():
         cv2.imwrite(filename_rgb, cv2.cvtColor(self.camera.img_rgb, cv2.COLOR_BGR2RGB))
         filename_depth = (self.target_dir + "/depth/" + 
                           str(self.camera.img_id_depth).zfill(4) + ".png")
-        cv2.imwrite(filename_depth, self.camera.img_depth)
+        cv2.imwrite(filename_depth, self.camera.img_depth.astype(np.uint16))
 
         # Add image to dataset
         self.dataset.addImage("rgb/" + str(self.camera.img_id_rgb).zfill(4) + ".png", 
