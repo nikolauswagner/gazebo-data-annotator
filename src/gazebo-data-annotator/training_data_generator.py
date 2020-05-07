@@ -61,15 +61,15 @@ class TrainingDataGenerator():
       if self.camera.img_ready_rgb and self.camera.img_ready_depth:
         # Store image
         filename_rgb = (self.target_dir + "/rgb/" + 
-                        str(self.camera.img_id_rgb).zfill(4) + ".png")
+                        str(self.dataset.num_imgs).zfill(4) + ".png")
         cv2.imwrite(filename_rgb, cv2.cvtColor(self.camera.img_rgb, cv2.COLOR_BGR2RGB))
         filename_depth = (self.target_dir + "/depth/" + 
-                          str(self.camera.img_id_depth).zfill(4) + ".png")
+                          str(self.dataset.num_imgs).zfill(4) + ".png")
         cv2.imwrite(filename_depth, self.camera.img_depth.astype(np.uint16))
 
         # Add image to dataset
-        self.dataset.addImage("rgb/" + str(self.camera.img_id_rgb).zfill(4) + ".png", 
-                              self.camera.img_id_rgb, 
+        self.dataset.addImage("rgb/" + str(self.dataset.num_imgs).zfill(4) + ".png", 
+                              self.dataset.num_imgs, 
                               self.camera.info_rgb.width, 
                               self.camera.info_rgb.height)
 
@@ -91,11 +91,12 @@ class TrainingDataGenerator():
             rot = rotVecByQuat(rot, quaternion_inverse(self.camera.rot()))
             self.dataset.addAnnotation(x_pos, y_pos, w, h,
                                        rot[0], rot[1], rot[2], 
-                                       3, self.camera.img_id_rgb, obj.id)
+                                       3, self.dataset.num_imgs, obj.id)
 
         # Reset flags
         self.camera.img_ready_rgb   = False
         self.camera.img_ready_depth = False
+        self.dataset.num_imgs = self.dataset.num_imgs + 1
 
 
       self.rate.sleep()

@@ -40,8 +40,6 @@ class RealsenseCamera(GazeboObject):
 
     # Image storage
     self.bridge = CvBridge()
-    self.img_id_rgb   = 0
-    self.img_id_depth = 0
     self.img_rgb   = None
     self.img_depth = None
     self.img_ready_rgb   = False
@@ -55,10 +53,8 @@ class RealsenseCamera(GazeboObject):
 
   def imgRGBCB(self, img):
     self.img_rgb       = self.bridge.imgmsg_to_cv2(img, desired_encoding='passthrough')
-    self.img_id_rgb    = self.img_id_rgb + 1 
     self.img_ready_rgb = True
 
   def imgDepthCB(self, img):
     self.img_depth       = self.bridge.imgmsg_to_cv2(img, desired_encoding='passthrough')
-    self.img_id_depth    = self.img_id_depth + 1 
     self.img_ready_depth = True

@@ -14,10 +14,11 @@ class CocoDataset():
     self.genCategories(["Unripe Strawberry", "Strawberry Flower",
                         "Bad Strawberry", "Ripe Strawberry"])
 
+    self.num_imgs = 0
     rospy.on_shutdown(self.writeJson)
 
   def writeJson(self):
-    print("Caught", len(self.dataset["images"]), "images!")
+    print("Caught", self.num_imgs, "images!")
     file = open(self.filename, "w")
     json.dump(self.dataset, file, indent=2)
     file.close()
