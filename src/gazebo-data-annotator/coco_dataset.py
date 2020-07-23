@@ -4,25 +4,24 @@ import time
 import json
 
 class CocoDataset():
-  def __init__(self, filename):
+  def __init__(self, filename, info="Gazebo generated dataset"):
     self.filename = filename
     self.dataset = {}
     self.dataset["annotations"] = []
     self.dataset["images"]      = []
-    self.genInformation("Nikolaus Wagner", "Gazebo generated dataset")
+    self.genInformation("Nikolaus Wagner", info)
     self.genLicenses()
     self.genCategories(["Unripe Strawberry", "Strawberry Flower",
                         "Bad Strawberry", "Ripe Strawberry"])
-
     self.num_imgs = 0
     rospy.on_shutdown(self.writeJson)
 
   def writeJson(self):
-    print("Caught", self.num_imgs, "images!")
+    print("Caught " + str(self.num_imgs) + " images!")
     file = open(self.filename, "w")
     json.dump(self.dataset, file, indent=2)
     file.close()
-    print("Written dataset to", self.filename)
+    print("Written dataset to" + self.filename)
 
   def genInformation(self, contributor, description):
     self.dataset["info"] = {}
@@ -50,10 +49,12 @@ class CocoDataset():
       category["supercategory"] = name
       self.dataset["categories"].append(category)
 
-  def addImage(self, filename, img_id, w, h):
+  def addImage(self, filename, img_id, w, h, depth=None):
     img = {}
     img["coco_url"]      = filename
     img["date_captured"] = time.asctime()
+    if depth:
+      img["depth"]     = depth
     img["file_name"]     = filename
     img["flickr_url"]    = filename
     img["height"]        = h
@@ -62,14 +63,18 @@ class CocoDataset():
     img["width"]         = w
     self.dataset["images"].append(img)
 
-  def addAnnotation(self, x_pos, y_pos, w, h, x_rot, y_rot, z_rot, cat, img_id, obj_id):
+  def addAnnotation(self, x_pos, y_pos, w, h, x_rot, y_rot, z_rot, cat, img_id, 
+                    obj_id, segmentation=None):
     annotation = {}
     annotation["area"]         = w * h
     annotation["bbox"]         = [x_pos, y_pos, w, h]
     annotation["orientation"]  = [x_rot, y_rot, z_rot]
     annotation["category_id"]  = cat
-    annotation["id"]           = obj_id
+    annotation["id"]           = int(obj_id)
     annotation["image_id"]     = img_id
     annotation["iscrowd"]      = 0
-    annotation["segmentation"] = "polygon"
+    if segmentation:
+      annotation["segmentation"] = [int(s) for s in segmentation]
+    else:
+      annotation["segmentation"] = "polygon"
     self.dataset["annotations"].append(annotation)

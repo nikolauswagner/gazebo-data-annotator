@@ -19,9 +19,7 @@ class GazeboObject():
 
 # Simulated Gazebo camera
 class RealsenseCamera(GazeboObject):
-  def __init__(self):
-    GazeboObject.__init__(self)
-
+  def __init__(self, camera_name='realsense_plugin'):
     # Metainformation
     self.info_rgb   = CameraInfo()
     self.info_depth = CameraInfo()
@@ -29,13 +27,13 @@ class RealsenseCamera(GazeboObject):
     self.offs_depth = np.array((0, -0.030, 0.004))
 
     # Callbacks
-    self.info_rgb_sub   = rospy.Subscriber("/realsense_plugin/camera/color/camera_info", 
+    self.info_rgb_sub   = rospy.Subscriber("/" + camera_name + "/camera/color/camera_info", 
                                            CameraInfo, self.infoRGBCB)
-    self.info_depth_sub = rospy.Subscriber("/realsense_plugin/camera/depth/camera_info", 
+    self.info_depth_sub = rospy.Subscriber("/" + camera_name + "/camera/depth_registered/camera_info", 
                                            CameraInfo, self.infoDepthCB)
-    self.img_rgb_sub    = rospy.Subscriber("/realsense_plugin/camera/color/image_raw", 
+    self.img_rgb_sub    = rospy.Subscriber("/" + camera_name + "/camera/color/image_raw", 
                                            Image, self.imgRGBCB)
-    self.img_depth_sub  = rospy.Subscriber("/realsense_plugin/camera/depth/image_raw", 
+    self.img_depth_sub  = rospy.Subscriber("/" + camera_name + "/camera/depth_registered/image_raw", 
                                            Image, self.imgDepthCB)
 
     # Image storage
@@ -58,3 +56,32 @@ class RealsenseCamera(GazeboObject):
   def imgDepthCB(self, img):
     self.img_depth       = self.bridge.imgmsg_to_cv2(img, desired_encoding='passthrough')
     self.img_ready_depth = True
+
+class SegmentationCamera(RealsenseCamera):
+  def __init__(self, camera_name="segmentation_plugin"):
+    # Metainformation
+    RealsenseCamera.__init__(self, camera_name)
+    self.info_seg   = CameraInfo()
+    self.offs_rgb   = np.array((0, 0, 0))
+    self.offs_depth = np.array((0, 0, 0))
+
+    # Callbacks
+    self.info_depth_sub = rospy.Subscriber("/" + camera_name + "/camera/depth/camera_info",
+                                         CameraInfo, self.infoDepthCB)
+    self.img_depth_sub  = rospy.Subscriber("/" + camera_name + "/camera/depth/image_raw",
+                                         Image, self.imgDepthCB)
+    self.info_seg_sub   = rospy.Subscriber("/" + camera_name + "/camera/segmentation/camera_info",
+                                           CameraInfo, self.infoSegCB)
+    self.img_seg_sub    = rospy.Subscriber("/" + camera_name + "/camera/segmentation/image_raw",
+                                           Image, self.imgSegCB)
+
+    # Image storage
+    self.img_seg       = None
+    self.img_ready_seg = False
+
+  def infoSegCB(self, info):
+    self.info_seg = info
+
+  def imgSegCB(self, img):
+    self.img_seg       = self.bridge.imgmsg_to_cv2(img, desired_encoding="passthrough")
+    self.img_ready_seg = True
