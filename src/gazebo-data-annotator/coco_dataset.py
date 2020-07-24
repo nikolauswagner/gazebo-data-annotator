@@ -2,6 +2,7 @@ import numpy as np
 import rospy
 import time
 import json
+import cv2
 
 class CocoDataset():
   def __init__(self, filename, info="Gazebo generated dataset"):
@@ -64,17 +65,20 @@ class CocoDataset():
     self.dataset["images"].append(img)
 
   def addAnnotation(self, x_pos, y_pos, w, h, x_rot, y_rot, z_rot, cat, img_id, 
-                    obj_id, segmentation=None):
+                    obj_id, segmentation=None, area=None):
     annotation = {}
-    annotation["area"]         = w * h
-    annotation["bbox"]         = [x_pos, y_pos, w, h]
-    annotation["orientation"]  = [x_rot, y_rot, z_rot]
-    annotation["category_id"]  = cat
-    annotation["id"]           = int(obj_id)
-    annotation["image_id"]     = img_id
-    annotation["iscrowd"]      = 0
+    if area:
+      annotation["area"]         = area
+    else:
+      annotation["area"]         = w * h
+    annotation["bbox"]           = [x_pos, y_pos, w, h]
+    annotation["orientation"]    = [x_rot, y_rot, z_rot]
+    annotation["category_id"]    = cat
+    annotation["id"]             = int(obj_id)
+    annotation["image_id"]       = img_id
+    annotation["iscrowd"]        = 0
     if segmentation:
-      annotation["segmentation"] = [int(s) for s in segmentation]
+      annotation["segmentation"] = segmentation
     else:
       annotation["segmentation"] = "polygon"
     self.dataset["annotations"].append(annotation)

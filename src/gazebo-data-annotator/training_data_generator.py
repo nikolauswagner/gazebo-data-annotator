@@ -133,13 +133,18 @@ class TrainingDataGenerator():
                                                                cv2.RETR_TREE, 
                                                                cv2.CHAIN_APPROX_SIMPLE)
             segmentation = list(itertools.chain.from_iterable([c.flatten() for c in contours]))
-            print(segmentation)
+            segmentation = [[int(s) for s in segmentation]]
+
+            # Calculate segmented area:
+            area = 0
+            for c in contours:
+              area += cv2.contourArea(c)
 
             # Add full annotation
             self.dataset.addAnnotation(x1, y1, x2 - x1, y2 - y1,
                                        rot[0], rot[1], rot[2], 
                                        3, self.dataset.num_imgs, 
-                                       obj.id, segmentation)
+                                       obj.id, segmentation, area)
 
         # Reset flags
         self.camera.img_ready_rgb   = False
@@ -149,6 +154,7 @@ class TrainingDataGenerator():
 
 
       self.rate.sleep()
+      raw_input("Enter to record next image...")
 
 if __name__ == '__main__':
   if len(sys.argv) < 1:
